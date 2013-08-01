@@ -54,7 +54,14 @@
 			if (base.options.direction == 'up') {
 				//If the direction has been set to up
 				base.ticker = setInterval(function() {
-					base.$el.find('li:last').detach().prependTo(base.$el).css('marginTop', '-' + base.options.row_height);
+
+          var scrollHeight = base.options.row_height;
+          if (scrollHeight == null) {
+            var li = base.$el.find('li:last');
+            scrollHeight = li.height();
+          }
+
+					base.$el.find('li:last').detach().prependTo(base.$el).css('marginTop', '-' + scrollHeight);
 					base.$el.find('li:first').animate({
 				        marginTop: '0px'
 				    }, base.options.speed, function () {
@@ -65,14 +72,20 @@
 			}else{
 				//Otherwise, run the default of down
 		    	base.ticker = setInterval(function() {
-		    	
+
+            var scrollHeight = base.options.row_height;
+            if (scrollHeight == null) {
+              var li = base.$el.find('li:first');
+              scrollHeight = li.height();
+            }
+
 		    		base.$el.find('li:first').animate({
-		            	marginTop: '-' + base.options.row_height
+		            	marginTop: '-' + scrollHeight
 		            }, base.options.speed, function() {
 		                $(this).detach().css('marginTop', '0').appendTo(base.$el);
 						base.$el.trigger("change");
 		            });
-		            
+
 		    	}, base.options.interval);
 	    	}
 	    }
@@ -243,7 +256,7 @@
   		previous	:	null,		/* ID of previous button or link */
   		stop		:	null,		/* ID of stop button or link */
   		start		:	null,		/* ID of start button or link */
-  		row_height	:	'100px',	/* Height of each ticker row in PX. Should be uniform. */
+  		row_height	:	null,	/* Height of each ticker row in PX. Should be uniform. */
   		speed		:	800,		/* Speed of transition animation in milliseconds */
   		interval	:	4000,		/* Time between change in milliseconds */
 		max_items	: 	null, 		/* Integer for how many items to display at once. Resizes height accordingly (OPTIONAL) */
