@@ -49,8 +49,8 @@
 			if (base.options.direction == 'up') {
 				//If the direction has been set to up
 				base.ticker = setInterval(function() {
-					base.$el.find('li:last').detach().prependTo(base.$el).css('marginTop', '-' + base.options.row_height);
-					base.$el.find('li:first').animate({
+					base.$el.find(base.options.el + ':last').detach().prependTo(base.$el).css('marginTop', '-' + base.options.row_height);
+					base.$el.find(base.options.el + ':first').animate({
 				        marginTop: '0px'
 				    }, base.options.speed, function () {
 				        //Callback functions go here
@@ -60,7 +60,7 @@
 				//Otherwise, run the default of down
 		    	base.ticker = setInterval(function() {
 		    	
-		    		base.$el.find('li:first').animate({
+		    		base.$el.find(base.options.el + ':first').animate({
 		            	marginTop: '-' + base.options.row_height
 		            }, base.options.speed, function() {
 		                $(this).detach().css('marginTop', '0').appendTo(base.$el);
@@ -122,8 +122,8 @@
 			//Previous Button
 			if (typeof(base.options.previous) != "undefined"  && base.options.previous != null){
 				$(base.options.previous).click(function(){
-					base.$el.find('li:last').detach().prependTo(base.$el).css('marginTop', '-' + base.options.row_height);
-					base.$el.find('li:first').animate({
+					base.$el.find(base.options.el + ':last').detach().prependTo(base.$el).css('marginTop', '-' + base.options.row_height);
+					base.$el.find(base.options.el + ':first').animate({
 				        marginTop: '0px'
 				    }, base.options.speed, function () {
 				        base.reset_interval();
@@ -135,7 +135,7 @@
 			//Next Button
 			if (typeof(base.options.next) != "undefined" && base.options.next != null){
 				$(base.options.next).click(function(){
-					base.$el.find('li:first').animate({
+					base.$el.find(base.options.el + ':first').animate({
 						marginTop: '-' + base.options.row_height
 			        }, base.options.speed, function() {
 			            $(this).detach().css('marginTop', '0px').appendTo(base.$el);
@@ -183,7 +183,8 @@
   		interval	:	4000,		/* Time between change in milliseconds */
 		max_items	: 	null, 		/* Integer for how many items to display at once. Resizes height accordingly (OPTIONAL) */
 		mousestop	:	false,		/* If set to true, the ticker will stop on mouseover */
-		direction	:	'down'		/* Direction that list will scroll */		
+		direction	:	'down',		/* Direction that list will scroll */
+        el          :   'li'        /* Elements to rotate */
   };
   
   $.fn.totemticker = function( options ){
