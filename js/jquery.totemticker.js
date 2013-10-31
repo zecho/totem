@@ -49,60 +49,25 @@
             if (base.options.direction == 'up') {
                 //If the direction has been set to up
                 base.ticker = setInterval(function () {
-                    if (base.options.containerOverflow == 'anim') {
-                        base.$el.css({
-                            overflow: 'hidden',
-                            height: base.options.row_height
-                        });
-                        base.$el.find(base.options.el).css({
-                            display: 'block',
-                            clear: 'left'
-                        });
-                    }
-
+                    base.prepareContainer();
                     base.$el.find(base.options.el + ':last').detach().prependTo(base.$el).css('marginTop', '-' + base.options.row_height);
                     base.$el.find(base.options.el + ':first').animate({
                         marginTop: '0px'
                     }, base.options.speed, function () {
-                        if (base.options.containerOverflow == 'anim') {
-                            base.$el.css({
-                                overflow: null,
-                                height: null,
-                            });
-                        }
+                        base.resetContainer();
+                        base.updateNavIndex('prev');
                     });
                 }, base.options.interval);
             } else {
                 //Otherwise, run the default of down
                 base.ticker = setInterval(function () {
-                    if (base.options.containerOverflow == 'anim') {
-                        base.$el.css({
-                            overflow: 'hidden',
-                            height: base.options.row_height
-                        });
-                        base.$el.find(base.options.el).css({
-                            display: 'block',
-                            clear: 'left'
-                        });
-                    }
-
+                    base.prepareContainer();
                     base.$el.find(base.options.el + ':first').animate({
                         marginTop: '-' + base.options.row_height
                     }, base.options.speed, function () {
                         $(this).detach().css('marginTop', '0').appendTo(base.$el);
-                        if (base.options.containerOverflow == 'anim') {
-                            base.$el.css({
-                                overflow: '',
-                                height: '',
-                            });
-                            base.$el.find(base.options.el)
-                                .removeClass('cg-active-menu-row')
-                                .css({
-                                    display: '',
-                                    clear: '',
-                                });
-                            base.$el.find(base.options.el + ':first').addClass('cg-active-menu-row');
-                        }
+                        base.resetContainer();
+                        base.updateNavIndex('next');
                     });
 
                 }, base.options.interval);
@@ -117,6 +82,76 @@
 
         base.stop_interval = function () {
             clearInterval(base.ticker);
+        };
+
+        base.prepareContainer = function () {
+            if (base.options.containerOverflow == 'anim') {
+                base.$el.css({
+                    overflow: 'hidden',
+                    height: base.options.row_height
+                });
+                base.$el.find(base.options.el).css({
+                    display: 'block',
+                    clear: 'left'
+                });
+            }
+        };
+
+        base.resetContainer = function () {
+            if (base.options.containerOverflow == 'anim') {
+                base.$el.css({
+                    overflow: '',
+                    height: '',
+                });
+                base.$el.find(base.options.el)
+                    .removeClass(base.options.activeClass)
+                    .css({
+                        display: '',
+                        clear: '',
+                    });
+                base.$el.find(base.options.el + ':first').addClass(base.options.activeClass)
+            }
+        };
+
+        base.updateNavIndex = function (direction) {
+            base.$el.find(base.options.el + ':first').addClass(base.options.activeClass);
+
+            var totalRows = base.$el.find('.cg-nav-category').length;
+            var currentIndex = base.$el.data('current') || 0;
+            currentIndex = (direction == 'next' ? ++currentIndex : --currentIndex ) % totalRows;
+            if (currentIndex < 0) {
+                currentIndex = totalRows - 1;
+            }
+
+            $('#cgj-nav-controls').find('.cg-counter').text(currentIndex + 1);
+            base.$el.data('current', currentIndex);
+        };
+
+        base.next = function (e) {
+            e.preventDefault();
+            base.prepareContainer();
+            base.$el.find(base.options.el + ':first')
+                .animate({
+                    marginTop: '-' + base.options.row_height
+                }, base.options.speed, function () {
+                    $(this).detach().css('marginTop', '0px').appendTo(base.$el);
+                    base.reset_interval();
+                    base.resetContainer();
+                    base.updateNavIndex('next');
+                });
+        };
+
+        base.previous = function (e) {
+            e.preventDefault();
+            base.prepareContainer();
+            base.$el.find(base.options.el + ':last').detach().prependTo(base.$el).css('marginTop', '-' + base.options.row_height);
+            base.$el.find(base.options.el + ':first').animate({
+                marginTop: '0px'
+            }, base.options.speed, function () {
+                base.reset_interval();
+                base.resetContainer();
+                base.updateNavIndex('prev');
+            });
         };
 
         base.format_ticker = function () {
@@ -159,28 +194,12 @@
 
             //Previous Button
             if (typeof(base.options.previous) != "undefined" && base.options.previous != null) {
-                $(base.options.previous).click(function () {
-                    base.$el.find(base.options.el + ':last').detach().prependTo(base.$el).css('marginTop', '-' + base.options.row_height);
-                    base.$el.find(base.options.el + ':first').animate({
-                        marginTop: '0px'
-                    }, base.options.speed, function () {
-                        base.reset_interval();
-                    });
-                    return false;
-                });
+                $(base.options.previous).on('click', base.previous);
             }
 
             //Next Button
             if (typeof(base.options.next) != "undefined" && base.options.next != null) {
-                $(base.options.next).click(function () {
-                    base.$el.find(base.options.el + ':first').animate({
-                        marginTop: '-' + base.options.row_height
-                    }, base.options.speed, function () {
-                        $(this).detach().css('marginTop', '0px').appendTo(base.$el);
-                        base.reset_interval();
-                    });
-                    return false;
-                });
+                $(base.options.next).on('click', base.next);
             }
 
             //Stop on mouse hover
@@ -222,7 +241,8 @@
         mousestop: false, /* If set to true, the ticker will stop on mouseover */
         direction: 'down', /* Direction that list will scroll */
         el: 'li', /* Elements to rotate */
-        containerOverflow: 'always'  /* When to put overflow:hidden to container */
+        containerOverflow: 'always', /* When to put overflow:hidden to container */
+        activeClass: 'active' /* Class for active row element */
     };
 
     $.fn.totemticker = function (options) {
